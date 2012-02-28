@@ -1,8 +1,9 @@
 ;;; tempo-ext.el --- extensions to tempo
 ;; 
-;; Copyright 2009-2011 Florian Kaufmann <sensorflo@gmail.com>
+;; Copyright 2009-2012 Florian Kaufmann <sensorflo@gmail.com>
 ;;
 ;; Author: Florian Kaufmann <sensorflo@gmail.com>
+;; URL: https://gitorious.org/tempo-ext
 ;; Created: 2009
 ;; 
 ;; This file is not part of GNU Emacs.
@@ -21,6 +22,9 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;; 
 ;;; Commentary: 
+;;
+;; Extension to the tempo library. Is in early stages; it's currently just a
+;; playground for myself.
 ;;
 ;;; Code: 
 (require 'tempo)
