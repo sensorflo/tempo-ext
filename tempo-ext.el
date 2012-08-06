@@ -55,6 +55,9 @@
     (cond
      (on-region
       (goto-char tempo-region-start)
+      (beginning-of-line)
+      (while (and (looking-at "\\s-*$") (< (point) tempo-region-stop))
+	(forward-line))
       (set-mark tempo-region-stop)
       (mark-whole-lines)
       'save-region)
