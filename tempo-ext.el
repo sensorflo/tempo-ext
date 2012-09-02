@@ -63,6 +63,7 @@
       'save-region)
      ((save-excursion (beginning-of-line) (not (looking-at "\\s-*$")))
       (end-of-line)
+      (setq tempo-insertion-start (point))
       'n>)
      (t "")))
 
@@ -118,4 +119,4 @@
 
 (provide 'tempo-ext)
 
-;;; tempo-ext.el ends here  
+;;; tempo-ext.el ends here
