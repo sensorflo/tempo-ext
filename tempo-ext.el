@@ -28,7 +28,10 @@
 ;;
 ;;; Code: 
 (require 'tempo)
-(require 'tempo-snippets)
+(require 'doremi)
+(require 'doremi-mac)
+
+(defvar tempo-ext-undo-state nil)
 
 ;;- first remove any apperance for preceding for
 ;; - after first try cycle through different versions. Restore beginning point by doing some kind
@@ -67,11 +70,6 @@
       'n>)
      (t "")))
 
-   ;; (ro ...)
-   ;; (r>o ...)
-   ;; region or the ... part. Typically region or a blankline 
-   ;; ...........
-
    ;; save region
    ((memq element '(sr save-region))
     (when on-region
@@ -82,40 +80,49 @@
 
 (add-to-list 'tempo-user-elements 'my-tempo-handler)
 
+(defmacro tempo-ext-define-group (cmd-name enum &optional doc-string)
+  (let* ((expaned-enum (mapcar (lambda (x) (intern (concat "tempo-template-" cmd-name x))) enum))
+	 (foo `(quote ,expaned-enum)))
+    `(defun ,(intern (concat "tempo-template-doremi-" cmd-name)) ()
+       ,(or doc-string (concat "Cycle among inserting" cmd-name))
+       (interactive)
+       (setq tempo-ext-undo-state (undo-get-state))
+       (tempo-ext-doremi-setter-fn (car ,foo))
+       (doremi (quote tempo-ext-doremi-setter-fn) (car ,foo) nil nil ,foo t)
+       (setq tempo-ext-undo-state nil))))
 
-(require 'doremi)
-(require 'doremi-mac)
+(defun tempo-ext-doremi-setter-fn (tempo-fn)
+  (tempo-ext-undo-revert-to-state tempo-ext-undo-state)
+  (funcall tempo-fn)
+  tempo-fn)
 
-(define-doremi tempo-test
-  ;; Doc string
-  "tempo test doc string"
-  "tempo test"                    ; Command menu name
-  ;; Setter function
-  'tempo-test-func
-  ;; Initial value
-  (car tempo-test-list)
-  nil                                       ; Ignored
-  tempo-test-list                        ; Cycle enumeration
-  t)
+(defun tempo-ext-undo-get-state ()
+  "Return a handler for the current state to which we might want to undo.
+The returned handler can then be passed to `tempo-ext-undo-revert-to-state'."
+  (unless (eq buffer-undo-list t)
+    buffer-undo-list))
 
-(setq tempo-test-list '(tempo-template-flori1 tempo-template-flori2 tempo-template-flori3))
-(defun tempo-test-func (newval)
-  (undo)
-  (funcall newval)
-  newval)
+(defun tempo-ext-undo-revert-to-state (state)
+  "Revert to the state STATE earlier grabbed with `tempo-ext-undo-get-state'.
+This undoing is not itself undoable (aka redoable)."
+  (unless (eq buffer-undo-list t)
+    (let ((new-undo-list (cons (car state) (cdr state))))
+      ;; Truncate the undo log at `state'.
+      (when state
+        (setcar state nil) (setcdr state nil))
+      (unless (eq last-command 'undo) (undo-start))
+      ;; Make sure there's no confusion.
+      (when (and state (not (eq state (last pending-undo-list))))
+        (error "Undoing to some unrelated state"))
+      ;; Undo it all.
+      (while (not (memq pending-undo-list '(nil t))) (undo-more 1))
+      ;; Reset the modified cons cell to its original content.
+      (when state
+        (setcar state (car new-undo-list))
+        (setcdr state (cdr new-undo-list)))
+      ;; Revert the undo info to what it was when we grabbed the state.
+      (setq buffer-undo-list state))))
 
-(defun tempo-test-meta ()
-  (interactive)
-  (undo-boundary)
-  (tempo-template-flori1)
-  (doremi-tempo-test)
-  ;(undo)
-  )
-
-
-(tempo-define-template "flori1" '("eins-" r "-eins"))  
-(tempo-define-template "flori2" '("zwei-" r "-zwei"))  
-(tempo-define-template "flori3" '("drei-" r "-drei"))  
 
 (provide 'tempo-ext)
 
