@@ -51,7 +51,11 @@
 
    ;; region or blank-line
    ((eq element 'r-or-blank-line>)
-    (if on-region 'r> '>n))
+    (if on-region
+	'r>
+      (indent-according-to-mode)	; p
+      (tempo-insert-mark (point-marker)) ; >
+      'n))
 
    ;; line wise start
    ((memq element '(lws line-wise-start))
