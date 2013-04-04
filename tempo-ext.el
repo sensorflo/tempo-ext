@@ -44,7 +44,10 @@
       (when (re-search-backward (concat rubout-regexp "\\=") (line-beginning-position) t)
         (delete-region (point) saved-point)))))
 
-(defun my-tempo-handler (element on-region)
+(defun my-tempo-handler (element)
+  ;; on-region:
+  ;; Due to Emacs Lisp's 'indefinite scope', the locale variable
+  ;; on-region bound in tempo-insert-template can be used here.
   (cond
 
    ((eq element '>n) (indent-according-to-mode) "\n")
