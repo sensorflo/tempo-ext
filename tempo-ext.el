@@ -3,7 +3,7 @@
 ;; Copyright 2009-2012 Florian Kaufmann <sensorflo@gmail.com>
 ;;
 ;; Author: Florian Kaufmann <sensorflo@gmail.com>
-;; URL: https://gitorious.org/tempo-ext
+;; URL: https://github.com/sensorflo/tempo-ext.git
 ;; Created: 2009
 ;; 
 ;; This file is not part of GNU Emacs.
